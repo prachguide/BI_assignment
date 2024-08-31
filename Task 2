@@ -1,0 +1,67 @@
+/* 1.	Segment customers into three groups:
+■	Frequent buyers: more than 5 orders.
+■	Regular buyers: 2 to 5 orders.
+■	Infrequent buyers: less than 2 orders. */
+SELECT
+    c.customer_id,
+    c.customer_name,
+    COUNT(o.order_id) AS order_count,
+    CASE
+        WHEN COUNT(o.order_id) > 5 THEN 'Frequent Buyer'
+        WHEN COUNT(o.order_id) BETWEEN 2 AND 5 THEN 'Regular Buyer'
+        ELSE 'Infrequent Buyer'
+    END AS customer_segment
+FROM
+    customers c
+JOIN
+    orders o ON c.customer_id = o.customer_id
+GROUP BY
+    c.customer_id, c.customer_name;
+
+/* 2.Calculate the average order total for each customer segment. */
+WITH customer_segments AS (
+    SELECT
+        c.customer_id,
+        c.customer_name,
+        COUNT(o.order_id) AS order_count,
+        CASE
+            WHEN COUNT(o.order_id) > 5 THEN 'Frequent Buyer'
+            WHEN COUNT(o.order_id) BETWEEN 2 AND 5 THEN 'Regular Buyer'
+            ELSE 'Infrequent Buyer'
+        END AS customer_segment
+    FROM
+        customers c
+    JOIN
+        orders o ON c.customer_id = o.customer_id
+    GROUP BY
+        c.customer_id, c.customer_name
+)
+SELECT
+    customer_segment,
+    AVG(o.order_total) AS average_order_total
+FROM
+    customer_segments cs
+JOIN
+    orders o ON cs.customer_id = o.customer_id
+GROUP BY
+    customer_segment;
+
+
+
+
+/*3 Identify regions with the highest average order total */
+SELECT 
+    c.region,
+    AVG(o.order_total) AS avg_order_total
+FROM 
+    customers c
+JOIN 
+    orders o 
+ON 
+    c.customer_id = o.customer_id
+GROUP BY 
+    c.region
+ORDER BY 
+    avg_order_total DESC;
+
+
